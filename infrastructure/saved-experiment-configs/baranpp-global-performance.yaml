@@ -1,0 +1,64 @@
+experiment_name: 2024-04-05-baranpp-global-performance
+
+ranges_baran:
+  dataset:
+    - beers
+    - flights
+    - hospital
+    - rayyan
+    - tax
+    - restaurant
+
+config_baran:
+  dataset: "1481"
+  n_rows: null
+  error_fraction: 1
+  error_class: "simple_mcar"
+  labeling_budget: 20
+
+
+ranges_renuver:
+  dataset:
+    - bridges
+    - cars
+    - glass
+    - restaurant
+  error_fraction:
+    - 1
+    - 3
+
+config_renuver:
+  dataset: "1481"
+  n_rows: null
+  error_fraction: 1
+  error_class: "simple_mcar"
+  labeling_budget: 20
+
+ranges_openml:
+  dataset:
+    - "6"
+    - "137"
+    - "151"
+    - "184"
+    - "1481"
+    - "41027"
+    - "43572"
+  error_fraction:
+    - 1
+    - 5
+  error_class:
+    - "simple_mcar"
+    - "imputer_simple_mcar"
+    - "simple_mnar"
+    - "imputer_simple_mnar"
+    - "simple_mar"
+    - "imputer_simple_mar"
+
+config_openml:
+  dataset: "1481"
+  n_rows: 1000
+  error_fraction: 1
+  error_class: "simple_mcar"
+  labeling_budget: 20
+
+runs: 3
