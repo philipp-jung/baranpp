@@ -11,8 +11,6 @@
 
 ########################################
 import os
-import io
-from itertools import combinations
 import math
 import json
 import pickle
@@ -22,9 +20,8 @@ import random
 import concurrent
 import multiprocessing
 import logging
-from typing import List, Tuple, Union, Dict
+from typing import List, Tuple, Dict
 
-import bz2
 import numpy
 import sklearn.svm
 import sklearn.ensemble
@@ -69,7 +66,7 @@ class Correction:
         self.VERBOSE = False
         self.SAVE_RESULTS = False
         self.ONLINE_PHASE = False
-        self.LABELING_BUDGET = 2
+        self.LABELING_BUDGET = 20
         self.MIN_CORRECTION_CANDIDATE_PROBABILITY = 0.0
         self.MIN_CORRECTION_OCCURRENCE = 2
         self.MAX_VALUE_LENGTH = 50
@@ -235,22 +232,7 @@ class Correction:
         corrections_features = []  # don't need further processing being used in ensembling.
 
         for feature in ['auto_instance', 'fd', 'llm_correction', 'llm_master']:
-            if feature == 'vicinity':
-                if self.VICINITY_FEATURE_GENERATOR == 'pdep':
-                    for o in self.VICINITY_ORDERS:
-                        corrections_features.append(f'vicinity_{o}')
-                elif self.VICINITY_FEATURE_GENERATOR == 'naive':  # every lhs combination creates a feature
-                    _, cols = d.dataframe.shape
-                    for o in self.VICINITY_ORDERS:
-                        for lhs in combinations(range(cols), o):
-                            corrections_features.append(f'vicinity_{o}_{str(lhs)}')
-            elif feature == 'value':
-                models = ['remover', 'adder', 'replacer', 'swapper']
-                encodings = ['identity', 'unicode']
-                models_names = [f"value_{m}_{e}" for m in models for e in encodings]
-                corrections_features.extend(models_names)
-            else:
-                corrections_features.append(feature)
+            corrections_features.append(feature)
 
         d.corrections = helpers.Corrections(corrections_features)
         d.lhs_values_frequencies = {}
@@ -611,15 +593,16 @@ class Correction:
 
 ########################################
 if __name__ == "__main__":
-    dataset_name = "184"
+    dataset_name = "151"
     version = 1
     error_fraction = 5
-    n_rows = None
+    n_rows = 1000
     error_class = 'simple_mcar'
     data = dataset.Dataset(dataset_name, error_fraction, version, error_class, n_rows)
     data.detected_cells = data.get_errors_dictionary()
     app = Correction()
     app.VERBOSE = True
-    p, r, f = app.run(data)
+    corrected_cells = app.run(data)
+    p, r, f = data.get_data_cleaning_evaluation(corrected_cells)[-3:]
     print("Baran++'s performance on {}:\nPrecision = {:.2f}\nRecall = {:.2f}\nF1 = {:.2f}".format(data.name, p, r, f))
 ########################################
