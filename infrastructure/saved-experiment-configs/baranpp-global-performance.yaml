@@ -7,7 +7,7 @@ ranges_baran:
     - hospital
     - rayyan
     - tax
-    - restaurant
+    - food
 
 config_baran:
   dataset: "1481"

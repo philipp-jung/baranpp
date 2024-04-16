@@ -593,7 +593,7 @@ class Correction:
 
 ########################################
 if __name__ == "__main__":
-    dataset_name = "151"
+    dataset_name = "tax"
     version = 1
     error_fraction = 5
     n_rows = 1000
