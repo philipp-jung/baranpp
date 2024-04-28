@@ -278,7 +278,7 @@ class Correction:
         if self.VERBOSE:
             print("Tuple {} is labeled.".format(d.sampled_tuple))
 
-    def prepare_augmented_models(self, d, synchronous=False):
+    def prepare_augmented_models(self, d, datawig_use_cache, synchronous=False):
         """
         Prepare Mimir's augmented models:
         1) Calculate gpdeps and append them to d.
@@ -340,7 +340,7 @@ class Correction:
                                                    d.name,
                                                    label=i_col,
                                                    time_limit=30,
-                                                   use_cache=False)
+                                                   use_cache=datawig_use_cache)
                 if imp is not None:
                     self.logger.debug(f'Trained DataWig model for column {col} ({i_col}).')
                     d.imputer_models[i_col] = imp.predict_proba(d.typed_dataframe)
@@ -548,7 +548,7 @@ class Correction:
         if self.VERBOSE:
             print("The results are stored in {}.".format(os.path.join(ec_folder_path, "correction.dataset")))
 
-    def run(self, d):
+    def run(self, d, datawig_use_cache):
         """
         This method runs Baran++ on an input dataset to correct data errors.
         """
@@ -569,8 +569,8 @@ class Correction:
         while len(d.labeled_tuples) < self.LABELING_BUDGET:
             self.sample_tuple(d)
             self.label_with_ground_truth(d)
-            self.prepare_augmented_models(d, synchronous=True)
-            self.generate_features(d, synchronous=True)
+            self.prepare_augmented_models(d, datawig_use_cache, synchronous=False)
+            self.generate_features(d, synchronous=False)
             self.predict_corrections(d)
             self.clean_with_user_input(d)
 
@@ -602,7 +602,8 @@ if __name__ == "__main__":
     data.detected_cells = data.get_errors_dictionary()
     app = Correction()
     app.VERBOSE = True
-    corrected_cells = app.run(data)
+    datawig_use_cache = True
+    corrected_cells = app.run(data, datawig_use_cache)
     p, r, f = data.get_data_cleaning_evaluation(corrected_cells)[-3:]
     print("Baran++'s performance on {}:\nPrecision = {:.2f}\nRecall = {:.2f}\nF1 = {:.2f}".format(data.name, p, r, f))
 ########################################

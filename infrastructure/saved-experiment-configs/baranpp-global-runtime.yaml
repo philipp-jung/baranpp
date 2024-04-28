@@ -14,7 +14,7 @@ config_baran:
   n_rows: null
   error_fraction: 1
   error_class: "simple_mcar"
-  datawig_use_cache: true
+  datawig_use_cache: false
 
 
 ranges_renuver:
@@ -32,7 +32,7 @@ config_renuver:
   n_rows: null
   error_fraction: 1
   error_class: "simple_mcar"
-  datawig_use_cache: true
+  datawig_use_cache: false
 
 ranges_openml:
   dataset:
@@ -49,6 +49,6 @@ config_openml:
   n_rows: 1000
   error_fraction: 5
   error_class: "imputer_simple_mcar"
-  datawig_use_cache: true
+  datawig_use_cache: false
 
 runs: 3

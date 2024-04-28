@@ -27,7 +27,7 @@ def run_baran(c: dict):
 
         app = correction.Correction()
         app.VERBOSE = False
-        correction_dictionary = app.run(data)
+        correction_dictionary = app.run(data, c['datawig_use_cache'])
         end_time = time.time()
 
         p, r, f = data.get_data_cleaning_evaluation(correction_dictionary)[-3:] 
