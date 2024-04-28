@@ -33,14 +33,16 @@ def train_cleaning_model(df: pd.DataFrame,
     rhs = df.columns[label]
     model_name = f'{dataset_name}-{label}-imputer-model'
 
-    # Splitting here maybe needs to be removed, because it doesn't scale well with
-    # dataset size. AutoGluon does smart train-test-splits internally, might be reasonable
-    # leveraging them. I currently keep this to have control over the data in one place.
-    df_train, df_test = train_test_split(df, test_size=.1)
+    if dataset_name == 'food' and rhs == 'address':
+        # AutoGluon fails to correctly reduce the number of classes when predicting column 12 (address)
+        # in the food dataset. I manually remove all classes that occurr less than 10 times. Otherwise,
+        # AutoGluon runs forever and consumes ~500GiB RAM.
+        counts = df[rhs].value_counts()
+        selected_categories = counts[counts > 10].index
+        df = df[df['address'].isin(selected_categories)]
 
     # Since I concatenate dataframes earlier, duplicate index entries are possible. Which is why I reset the index.
-    df_train.reset_index(drop=True, inplace=True)
-    df_test.reset_index(drop=True, inplace=True)
+    df.reset_index(drop=True, inplace=True)
 
     try:
         if not use_cache:
@@ -55,8 +57,7 @@ def train_cleaning_model(df: pd.DataFrame,
                 output_column=rhs,
                 verbosity=verbosity,
             )
-            imputer.fit(train_df=df_train,
-                        test_df=df_test,
+            imputer.fit(df=df,
                         time_limit=time_limit)
 
         except TargetColumnException:

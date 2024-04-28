@@ -6,6 +6,8 @@ import random
 import pickle
 import inspect
 from autogluon.tabular import TabularPredictor
+from sklearn.feature_extraction.text import CountVectorizer
+from autogluon.features.generators import AutoMLPipelineFeatureGenerator
 from pathlib import Path
 
 from typing import List, Any
@@ -74,8 +76,7 @@ class AutoGluonImputer():
         return self.output_path / Path(f'agModels/{self.model_name}')
 
     def fit(self,
-            train_df: pd.DataFrame,
-            test_df: pd.DataFrame = None,
+            df: pd.DataFrame,
             time_limit: int = 30) -> Any:
         """
         Trains AutoGluonImputer model for a single column
@@ -95,13 +96,19 @@ class AutoGluonImputer():
             raise TargetColumnException("Maximum class count below 10, "
                                         "cannot train imputation model")
 
+        # Some datasets let AutoGluon run into memory issues. This configuration is a good
+        # tradeoff I found: 'medium_quality' presets, time limits between 300 <= time_limit <= 900,
+        # und 3000 max_features beim word vectorizer, damit der Arbeitsspeicher nicht vollläuft.
+        feature_generator = AutoMLPipelineFeatureGenerator(vectorizer=CountVectorizer(min_df=30, ngram_range=(1, 3), max_features=3000, dtype=np.uint8))
+
+
         self.predictor = TabularPredictor(label=self.output_column,
                                       path=self.ag_model_path,
                                       verbosity=self.verbosity,
                                       problem_type='multiclass').\
-        fit(train_data=train_df,
-            tuning_data=test_df,
+        fit(train_data=df,
             time_limit=time_limit,
+            feature_generator=feature_generator,
             calibrate=True,
             verbosity=self.verbosity,
             num_cpus=25)  # funny: num_cpus expects a string, and if you pass a string AG crashes.
