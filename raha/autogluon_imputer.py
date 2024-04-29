@@ -81,18 +81,14 @@ class AutoGluonImputer():
         """
         Trains AutoGluonImputer model for a single column
 
-        :param train_df: training data as dataframe
-        :param test_df: test data as dataframe; if not provided, a ratio of test_split of the
-                            training data are used as test data
-        :param test_split: if no test_df is provided this is the ratio of test data to be held
-                            separate for determining model convergence
+        :param df: training data as dataframe
         :param time_limit: time limit for AutoGluon in seconds
         """
 
         if self.input_columns is None:
-            self.input_columns = [c for c in train_df.columns if c is not self.output_column]
+            self.input_columns = [c for c in df.columns if c is not self.output_column]
 
-        if train_df[self.output_column].value_counts().max() < 10:
+        if df[self.output_column].value_counts().max() < 10:
             raise TargetColumnException("Maximum class count below 10, "
                                         "cannot train imputation model")
 
