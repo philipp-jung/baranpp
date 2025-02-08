@@ -593,11 +593,11 @@ class Correction:
 
 ########################################
 if __name__ == "__main__":
-    dataset_name = "tax"
+    dataset_name = "184"
     version = 1
     error_fraction = 5
     n_rows = 1000
-    error_class = 'simple_mcar'
+    error_class = 'imputer_simple_mcar'
     data = dataset.Dataset(dataset_name, error_fraction, version, error_class, n_rows)
     data.detected_cells = data.get_errors_dictionary()
     app = Correction()
